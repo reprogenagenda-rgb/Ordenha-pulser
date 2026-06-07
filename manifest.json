@@ -1,7 +1,7 @@
 {
   "name": "Teste Pulsador Balde ao Pé",
   "short_name": "Pulsador",
-  "description": "App de campo para medir pulsadas do pulsador de ordenhadeira balde ao pé.",
+  "description": "App de campo para medir, depurar e comparar pulsadas do pulsador de ordenhadeira balde ao pé.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

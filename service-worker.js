@@ -1,5 +1,5 @@
-/* Teste Pulsador Balde ao Pé v2.4 — Service Worker */
-var CACHE_NAME = 'teste-pulsador-v2-4-cache-20260607';
+/* Teste Pulsador Balde ao Pé v2.5 — Service Worker */
+var CACHE_NAME = 'teste-pulsador-v2-5-cache-20260607b';
 var APP_ASSETS = [
   './',
   './index.html',

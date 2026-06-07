@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Teste Pulsador v2.4 — Balde ao Pé</title>
+<title>Teste Pulsador v2.5 — Balde ao Pé</title>
 <meta name="theme-color" content="#1e7e34">
 <meta name="description" content="App offline de campo para medir pulsadas do pulsador de ordenhadeira balde ao pé.">
 <link rel="manifest" href="manifest.json">
@@ -131,6 +131,17 @@ canvas#waveCanvas{display:block;width:100%;height:80px;}
 .det-box{background:var(--bg);border:1px solid var(--borda);border-radius:8px;padding:12px 8px;text-align:center;}
 .det-val{font-family:var(--fd);font-size:30px;color:var(--verde-neon);line-height:1;}
 .det-lbl{font-family:var(--fm);font-size:9px;color:var(--texto2);letter-spacing:1px;text-transform:uppercase;margin-top:3px;}
+.dep-card{background:rgba(77,219,110,0.045);border:1px solid rgba(77,219,110,0.18);border-radius:8px;padding:12px;margin:10px 0;}
+.dep-title{font-family:var(--fm);font-size:10px;letter-spacing:1px;color:var(--verde-neon);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.dep-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.dep-item{background:var(--bg);border:1px solid var(--borda);border-radius:6px;padding:8px 7px;}
+.dep-k{font-family:var(--fm);font-size:8px;letter-spacing:1px;color:var(--texto2);text-transform:uppercase;}
+.dep-v{font-family:var(--fd);font-size:21px;color:var(--texto);letter-spacing:1px;margin-top:2px;line-height:1;}
+.dep-v.ok{color:var(--verde-neon);} .dep-v.att{color:var(--amarelo-cl);} .dep-v.err{color:var(--vermelho-cl);}
+.dep-bar{height:7px;background:var(--bg3);border-radius:6px;overflow:hidden;margin-top:7px;border:1px solid var(--borda);}
+.dep-fill{height:100%;width:0%;background:var(--verde-neon);transition:width .2s;}
+.dep-note{font-family:var(--fm);font-size:9px;color:var(--texto2);line-height:1.5;margin-top:8px;}
+
 
 /* LIMIAR */
 .limiar-wrap{padding:10px 14px;background:var(--bg);border:1px solid var(--borda);border-radius:8px;margin-bottom:10px;}
@@ -247,7 +258,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     <p>Balde ao Pé · Diagnóstico de Campo</p>
   </div>
   <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
-    <span class="hdr-v2">v2.3</span>
+    <span class="hdr-v2">v2.5</span>
     <span class="hdr-badge">Reprogen</span>
   </div>
 </div>
@@ -316,7 +327,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     <!-- ── MÉTODO MICROFONE ── -->
     <div id="painel-mic" style="display:none;">
       <div class="crono-instr" style="margin-bottom:12px;">
-        🎙️ O app vai <strong>ouvir o pulsador</strong> pelo microfone e contar os ciclos automaticamente. Aproxime o celular do equipamento.
+        🎙️ O app vai <strong>ouvir, depurar e comparar</strong> o som do pulsador com o padrão regular. Aproxime o celular do pulsador e reduza ruídos externos.
       </div>
 
       <div class="mic-status-bar">
@@ -352,6 +363,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
         </div>
       </div>
 
+      <div class="dep-card" id="dep-card">
+        <div class="dep-title">🧪 Depuração do som coletado</div>
+        <div class="dep-grid">
+          <div class="dep-item"><div class="dep-k">Ruído de fundo</div><div class="dep-v" id="dep-ruido">—</div></div>
+          <div class="dep-item"><div class="dep-k">Qualidade do sinal</div><div class="dep-v" id="dep-qualidade">—</div></div>
+          <div class="dep-item"><div class="dep-k">Intervalo médio</div><div class="dep-v" id="dep-intervalo">—</div></div>
+          <div class="dep-item"><div class="dep-k">Regularidade</div><div class="dep-v" id="dep-regularidade">—</div></div>
+          <div class="dep-item"><div class="dep-k">Falhas detectadas</div><div class="dep-v" id="dep-falhas">0</div></div>
+          <div class="dep-item"><div class="dep-k">Diferença p/ 60 ppm</div><div class="dep-v" id="dep-diferenca">—</div></div>
+        </div>
+        <div class="dep-bar"><div class="dep-fill" id="dep-fill"></div></div>
+        <div class="dep-note" id="dep-note">Aguardando captura. Para boa comparação, grave de 15 a 30 segundos com o celular próximo ao pulsador.</div>
+      </div>
+
       <div class="mic-container">
         <button class="btn btn-mic" id="btn-mic" onclick="toggleMic()">🎙️ INICIAR CAPTURA</button>
         <button class="btn btn-c" onclick="confirmarMic()" id="btn-confirmar-mic" style="display:none;">✔ CONFIRMAR RESULTADO</button>
@@ -363,7 +388,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
       </div>
 
       <div class="avt" style="margin-top:10px;">
-        ⚠ A captura por microfone depende do ambiente sonoro. Reduzir ruídos externos melhora a precisão. Ajuste a sensibilidade conforme o equipamento.
+        ⚠ A comparação sonora é triagem de campo. O app depura ruído, detecta pulsos e compara ritmo/regularidade; não substitui vacuômetro ou pulsógrafo.
       </div>
     </div>
   </div>
@@ -497,6 +522,8 @@ var S = {
   emDeteccao: false, cooldown: false,
   animFrame: null,
   waveData: null,
+  pulseTimes: [], rmsSmooth: 0, noiseFloor: 0, peakLevel: 0, lastRms: 0, lastPeakAt: 0,
+  micAnalysis: null, autoThreshold: 0,
   // Som padrão
   somPadraoAtivo: false, refAudioCtx: null, refTimer: null, refBeat: 0
 };
@@ -696,6 +723,15 @@ function iniciarMic() {
       S.batidas = 0;
       S.micTempo = 0;
       S.cooldown = false;
+      S.pulseTimes = [];
+      S.rmsSmooth = 0;
+      S.noiseFloor = 0;
+      S.peakLevel = 0;
+      S.lastRms = 0;
+      S.lastPeakAt = 0;
+      S.micAnalysis = null;
+      S.autoThreshold = 0;
+      atualizarDepuracaoUI(null);
       // UI
       setMicUI(true);
       // Timer de tempo
@@ -731,16 +767,110 @@ function detectarPico() {
     var v = (buf[i] - 128) / 128.0;
     soma += v * v;
   }
-  var rms = Math.sqrt(soma / len); // 0.0 – 1.0
+  var rms = Math.sqrt(soma / len); // envelope bruto 0.0 – 1.0
 
-  if (rms > S.limiar && !S.cooldown) {
+  // Depuração: suaviza o envelope para reduzir estalos e ruído curto.
+  S.rmsSmooth = S.rmsSmooth ? (S.rmsSmooth * 0.72 + rms * 0.28) : rms;
+
+  // Ruído de fundo adaptativo: aprende quando o sinal está baixo.
+  if (!S.noiseFloor) S.noiseFloor = S.rmsSmooth;
+  if (S.rmsSmooth < S.noiseFloor * 1.55 || S.batidas < 2) {
+    S.noiseFloor = S.noiseFloor * 0.96 + S.rmsSmooth * 0.04;
+  }
+
+  // Limiar automático combinado com ajuste manual.
+  var limManual = S.limiar;
+  var limAuto = Math.max(0.018, S.noiseFloor * 2.35 + 0.010);
+  S.autoThreshold = Math.max(limManual, limAuto);
+  if (S.rmsSmooth > S.peakLevel) S.peakLevel = S.rmsSmooth;
+
+  var agora = (window.performance && performance.now) ? performance.now() : Date.now();
+  var minGap = 300; // evita contar ruído duplo; máximo prático 200 ppm.
+  var subindo = S.rmsSmooth > S.lastRms * 1.03;
+  var picoValido = S.rmsSmooth > S.autoThreshold && subindo && (agora - S.lastPeakAt) > minGap;
+
+  if (picoValido) {
     S.batidas++;
+    S.lastPeakAt = agora;
+    S.pulseTimes.push(agora);
     document.getElementById('det-batidas').textContent = S.batidas;
-    S.cooldown = true;
-    // Cooldown mínimo entre batidas: 300ms (equivale a máx ~200 ppm)
-    setTimeout(function() { S.cooldown = false; }, 300);
     atualizarPPMLive();
   }
+  S.lastRms = S.rmsSmooth;
+  atualizarDepuracaoUI(calcularAnaliseMic(false));
+}
+
+function calcularAnaliseMic(finalizar) {
+  var n = S.pulseTimes.length;
+  var tempo = S.micTempo || 0;
+  var ppm = tempo >= 3 && S.batidas > 0 ? Math.round((S.batidas / tempo) * 60) : null;
+  var intervals = [];
+  for (var i = 1; i < n; i++) intervals.push(S.pulseTimes[i] - S.pulseTimes[i-1]);
+  var media = null, regularidade = null, falhas = 0, cv = null;
+  if (intervals.length) {
+    var soma = 0;
+    for (var j = 0; j < intervals.length; j++) soma += intervals[j];
+    media = soma / intervals.length;
+    var varsum = 0;
+    for (var k = 0; k < intervals.length; k++) varsum += Math.pow(intervals[k] - media, 2);
+    var sd = Math.sqrt(varsum / intervals.length);
+    cv = media > 0 ? sd / media : 1;
+    regularidade = Math.max(0, Math.min(100, Math.round(100 - cv * 180)));
+    // Falha: pausa muito maior que o intervalo médio esperado do próprio sinal ou do padrão 60 ppm.
+    var refGap = media || 1000;
+    for (var f = 0; f < intervals.length; f++) {
+      if (intervals[f] > Math.max(1700, refGap * 1.65)) falhas++;
+    }
+  }
+  var ruidoNivel = '—';
+  if (S.noiseFloor > 0) {
+    if (S.noiseFloor < 0.025) ruidoNivel = 'baixo';
+    else if (S.noiseFloor < 0.065) ruidoNivel = 'moderado';
+    else ruidoNivel = 'alto';
+  }
+  var snr = S.noiseFloor > 0 ? (S.peakLevel / S.noiseFloor) : 0;
+  var qualidade = '—';
+  if (snr) {
+    if (snr >= 4 && ruidoNivel !== 'alto') qualidade = 'boa';
+    else if (snr >= 2.2) qualidade = 'média';
+    else qualidade = 'ruim';
+  }
+  var diferenca = ppm !== null ? ppm - 60 : null;
+  var compat = 'AGUARDANDO';
+  if (ppm !== null && regularidade !== null) {
+    if (ppm >= 56 && ppm <= 60 && regularidade >= 85 && falhas === 0 && qualidade !== 'ruim') compat = 'COMPATÍVEL';
+    else if ((ppm >= 50 && ppm <= 65) && regularidade >= 70 && falhas <= 1) compat = 'ATENÇÃO';
+    else compat = 'REVISAR';
+  }
+  return {ppm:ppm, intervaloMedio:media, regularidade:regularidade, falhas:falhas, ruido:ruidoNivel, qualidade:qualidade, diferenca:diferenca, compat:compat, tempo:tempo, batidas:S.batidas};
+}
+
+function atualizarDepuracaoUI(a) {
+  var elRuido = document.getElementById('dep-ruido');
+  if (!elRuido) return;
+  if (!a) a = {ruido:'—',qualidade:'—',intervaloMedio:null,regularidade:null,falhas:0,diferenca:null,compat:'AGUARDANDO'};
+  setDepVal('dep-ruido', a.ruido, a.ruido === 'alto' ? 'err' : (a.ruido === 'moderado' ? 'att' : (a.ruido === 'baixo' ? 'ok' : '')));
+  setDepVal('dep-qualidade', a.qualidade, a.qualidade === 'boa' ? 'ok' : (a.qualidade === 'média' ? 'att' : (a.qualidade === 'ruim' ? 'err' : '')));
+  setDepVal('dep-intervalo', a.intervaloMedio ? Math.round(a.intervaloMedio) + ' ms' : '—', a.intervaloMedio && a.intervaloMedio >= 930 && a.intervaloMedio <= 1070 ? 'ok' : '');
+  setDepVal('dep-regularidade', a.regularidade !== null ? a.regularidade + '%' : '—', a.regularidade >= 85 ? 'ok' : (a.regularidade >= 70 ? 'att' : (a.regularidade !== null ? 'err' : '')));
+  setDepVal('dep-falhas', String(a.falhas || 0), a.falhas > 1 ? 'err' : (a.falhas === 1 ? 'att' : 'ok'));
+  setDepVal('dep-diferenca', a.diferenca !== null ? ((a.diferenca > 0 ? '+' : '') + a.diferenca + ' ppm') : '—', a.diferenca !== null && Math.abs(a.diferenca) <= 4 ? 'ok' : (a.diferenca !== null && Math.abs(a.diferenca) <= 10 ? 'att' : (a.diferenca !== null ? 'err' : '')));
+  var fill = document.getElementById('dep-fill');
+  if (fill) fill.style.width = (a.regularidade !== null ? Math.max(5, a.regularidade) : 0) + '%';
+  var note = document.getElementById('dep-note');
+  if (note) {
+    if (a.compat === 'COMPATÍVEL') note.textContent = 'Som depurado compatível com pulso regular: ritmo próximo de 60 ppm, regularidade boa e sem falhas relevantes.';
+    else if (a.compat === 'ATENÇÃO') note.textContent = 'Som depurado dentro de faixa observável, mas com atenção: conferir limpeza, vácuo, mangueiras e repetir captura se houver ruído.';
+    else if (a.compat === 'REVISAR') note.textContent = 'Som depurado diferente do padrão: há indício de pulsador lento/rápido, irregular, falhas ou sinal ruim. Revisar equipamento.';
+    else note.textContent = 'Aguardando captura. Para boa comparação, grave de 15 a 30 segundos com o celular próximo ao pulsador.';
+  }
+}
+
+function setDepVal(id, texto, cls) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'dep-v' + (cls ? ' ' + cls : '');
+  el.textContent = texto;
 }
 
 function atualizarPPMLive() {
@@ -760,7 +890,7 @@ function desenharOnda() {
   ctx.fillRect(0, 0, W, H);
 
   // Linha limiar
-  var limiarY = H/2 - (S.limiar * H/2);
+  var limiarY = H/2 - ((S.autoThreshold || S.limiar) * H/2);
   ctx.strokeStyle = 'rgba(231,76,60,0.3)';
   ctx.setLineDash([4, 4]);
   ctx.lineWidth = 1;
@@ -812,7 +942,7 @@ function setMicUI(ativo) {
   var btnConf = document.getElementById('btn-confirmar-mic');
   if (ativo) {
     dot.className = 'mic-dot ouvindo';
-    txt.innerHTML = '<strong>Ouvindo pulsador...</strong> aguarde ao menos 15 segundos';
+    txt.innerHTML = '<strong>Ouvindo e depurando...</strong> ideal 15 a 30 segundos';
     btn.textContent = '⏹ PARAR CAPTURA';
     btn.classList.add('ativo');
     btnConf.style.display = 'none';
@@ -823,19 +953,24 @@ function setMicUI(ativo) {
       : '<strong>Microfone inativo</strong>';
     btn.textContent = '🎙️ INICIAR CAPTURA';
     btn.classList.remove('ativo');
-    if (S.batidas > 0 && S.micTempo >= 3) btnConf.style.display = '';
+    if (S.batidas > 0 && S.micTempo >= 8) btnConf.style.display = '';
   }
 }
 
 function confirmarMic() {
-  if (S.micTempo < 3 || S.batidas === 0) { alert('Capture ao menos 3 segundos para confirmar.'); return; }
-  var ppm = Math.round((S.batidas / S.micTempo) * 60);
-  S.ppmFinal = ppm;
-  document.getElementById('ppm-mic-val').textContent = ppm;
+  if (S.micTempo < 8 || S.batidas < 4) {
+    alert('Capture preferencialmente 15 a 30 segundos. Mínimo técnico: 8 segundos e 4 pulsos detectados.');
+    return;
+  }
+  var a = calcularAnaliseMic(true);
+  S.micAnalysis = a;
+  S.ppmFinal = a.ppm;
+  document.getElementById('ppm-mic-val').textContent = a.ppm;
   document.getElementById('ppm-mic-res').style.display = 'block';
   document.getElementById('btn-confirmar-mic').style.display = 'none';
   document.getElementById('mic-dot').className = 'mic-dot ok';
-  document.getElementById('mic-status-txt').innerHTML = '<strong>✔ PPM confirmado:</strong> ' + ppm + ' pulsadas/min';
+  document.getElementById('mic-status-txt').innerHTML = '<strong>✔ Som depurado:</strong> ' + a.ppm + ' ppm · regularidade ' + (a.regularidade !== null ? a.regularidade + '%' : '—') + ' · ' + a.compat;
+  atualizarDepuracaoUI(a);
 }
 
 // ══════════════════════════════════════════════
@@ -891,6 +1026,7 @@ function gerarResultado() {
   var tet = S.opcoes['tet'] || '—';
   var ar = S.opcoes['ar'] || '—';
   var limp = S.opcoes['limp'] || '—';
+  var micA = S.metodo === 'mic' ? (S.micAnalysis || calcularAnaliseMic(true)) : null;
 
   // Alertas
   var als = [];
@@ -900,8 +1036,13 @@ function gerarResultado() {
   if (['Rachadas','Deformadas'].indexOf(tet) !== -1) als.push('Teteiras '+tet.toLowerCase()+' comprometem vácuo e higiene. Substituição imediata recomendada.');
   if (ar === 'Sim' || ar === 'Às vezes') als.push('Entrada falsa de ar ou queda de teteira confirma problema no circuito de vácuo.');
   if (limp === 'Não') als.push('Pulsador sem limpeza recente — resíduo pode estar bloqueando orifício calibrado e alterando o ritmo.');
+  if (micA) {
+    if (micA.qualidade === 'ruim') als.push('Qualidade do sinal sonoro ruim. Repetir captura mais próximo ao pulsador e com menos ruído de motor, vento ou fala.');
+    if (micA.regularidade !== null && micA.regularidade < 70) als.push('Som depurado com regularidade baixa ('+micA.regularidade+'%). Indica oscilação forte ou pulsos inconsistentes.');
+    if (micA.falhas > 0) als.push('Foram detectadas '+micA.falhas+' pausa(s)/falha(s) no ritmo do pulsador durante a captura.');
+  }
 
-  var regularFuncional = (ppm !== null && ppm >= 56 && ppm <= 60 && reg === 'Regular' && vacuo !== 'Não' && (ar === 'Não' || ar === '—') && ['Rachadas','Deformadas'].indexOf(tet) === -1);
+  var regularFuncional = (ppm !== null && ppm >= 56 && ppm <= 60 && reg === 'Regular' && vacuo !== 'Não' && (ar === 'Não' || ar === '—') && ['Rachadas','Deformadas'].indexOf(tet) === -1 && (!micA || (micA.regularidade >= 85 && micA.falhas === 0 && micA.qualidade !== 'ruim')));
   if (ppm !== null && ppm >= 56 && ppm <= 60 && !regularFuncional) {
     als.push('Pulsadas dentro do padrão, mas funcionamento não aprovado como regular. Conferir som, vácuo, entrada de ar, teteiras e os dois lados do pulsador.');
   }
@@ -916,7 +1057,7 @@ function gerarResultado() {
   var reg2 = {
     id: Date.now(), p: p, ppm: ppm !== null ? ppm : '—',
     classif: cl ? cl.label : '—', reg: reg, vacuo: vacuo,
-    tet: tet, ar: ar, limp: limp, regularFuncional: regularFuncional ? 'SIM' : 'NÃO', als: als, rec: rec
+    tet: tet, ar: ar, limp: limp, regularFuncional: regularFuncional ? 'SIM' : 'NÃO', mic: micA, als: als, rec: rec
   };
   salvarHist(reg2);
 
@@ -927,6 +1068,13 @@ function gerarResultado() {
   h += rl('Equipamento', p.equip)+rl('Método', p.metodo);
   h += rl('Padrão esperado', '56–60 ppm · referência 60 ppm');
   h += rl('Pulsadas/min', '<span style="font-family:var(--fd);font-size:24px;color:var(--verde-neon)">'+(ppm !== null ? ppm : '—')+'</span>');
+  if (micA) {
+    h += rl('Som depurado', esc(micA.compat));
+    h += rl('Regularidade sonora', micA.regularidade !== null ? micA.regularidade + '%' : '—');
+    h += rl('Intervalo médio', micA.intervaloMedio ? Math.round(micA.intervaloMedio) + ' ms' : '—');
+    h += rl('Falhas sonoras', String(micA.falhas || 0));
+    h += rl('Ruído / sinal', esc(micA.ruido + ' / ' + micA.qualidade));
+  }
   h += '</div>';
 
   if (cl) {
@@ -968,7 +1116,7 @@ function rl(k,v){ return '<div class="rl"><span class="rk">'+esc(k)+'</span><spa
 // ══════════════════════════════════════════════
 //  HISTÓRICO
 // ══════════════════════════════════════════════
-var LS = 'reprogen_pulsador_v2';
+var LS = 'reprogen_pulsador_v25';
 function salvarHist(r){ var h=carregarHist(); h.unshift(r); try{localStorage.setItem(LS,JSON.stringify(h));}catch(e){} }
 function carregarHist(){ try{var r=localStorage.getItem(LS);return r?JSON.parse(r):[];}catch(e){return[];} }
 
@@ -1031,19 +1179,19 @@ document.getElementById('modal').addEventListener('click',function(e){if(e.targe
 function expCSV(){
   var hist=carregarHist();
   if(!hist.length){alert('Nenhum teste para exportar.');return;}
-  var cab=['ID','Propriedade','Data','Responsavel','Equipamento','Metodo','PPM','Classificacao','Regularidade','Vacuo','Teteiras','Entrada_Ar','Limpeza','Alertas','Recomendacao'];
+  var cab=['ID','Propriedade','Data','Responsavel','Equipamento','Metodo','PPM','Classificacao','Regularidade','Vacuo','Teteiras','Entrada_Ar','Limpeza','Regularidade_Sonora','Falhas_Sonoras','Ruido','Qualidade_Sinal','Compatibilidade_Som','Alertas','Recomendacao'];
   var lns=[cab.join(';')];
   for(var i=0;i<hist.length;i++){
     var r=hist[i];
-    lns.push([r.id,r.p.prop,r.p.data,r.p.resp,r.p.equip,r.p.metodo||'—',r.ppm,r.classif,r.reg,r.vacuo,r.tet,r.ar,r.limp,'"'+(r.als||[]).join(' | ')+'"','"'+r.rec+'"'].join(';'));
+    lns.push([r.id,r.p.prop,r.p.data,r.p.resp,r.p.equip,r.p.metodo||'—',r.ppm,r.classif,r.reg,r.vacuo,r.tet,r.ar,r.limp,(r.mic&&r.mic.regularidade!==null?r.mic.regularidade:''),(r.mic?r.mic.falhas:''),(r.mic?r.mic.ruido:''),(r.mic?r.mic.qualidade:''),(r.mic?r.mic.compat:''),'"'+(r.als||[]).join(' | ')+'"','"'+r.rec+'"'].join(';'));
   }
-  baixar('reprogen_pulsador_v2.csv',lns.join('\n'),'text/csv;charset=utf-8;');
+  baixar('reprogen_pulsador_v25.csv',lns.join('\n'),'text/csv;charset=utf-8;');
 }
 
 function expJSON(){
   var hist=carregarHist();
   if(!hist.length){alert('Nenhum teste para exportar.');return;}
-  baixar('reprogen_pulsador_v2.json',JSON.stringify(hist,null,2),'application/json');
+  baixar('reprogen_pulsador_v25.json',JSON.stringify(hist,null,2),'application/json');
 }
 
 function baixar(nome,cont,tipo){
@@ -1066,7 +1214,7 @@ function imprimirRel(){
   h+='td,th{border:1px solid #ccc;padding:5px 8px;font-size:11px;}th{background:#f0f7f0;}';
   h+='.alerta{background:#fff3f3;border-left:3px solid #c0392b;padding:4px 8px;margin:3px 0;font-size:11px;}';
   h+='</style></head><body>';
-  h+='<h1>Reprogen — Relatório de Testes de Pulsador v2</h1>';
+  h+='<h1>Reprogen — Relatório de Testes de Pulsador v2.5</h1>';
   h+='<p style="font-size:11px;color:#666">Gerado em: '+new Date().toLocaleString('pt-BR')+'</p>';
   for(var i=0;i<hist.length;i++){
     var r=hist[i];
@@ -1111,6 +1259,8 @@ function limpar(){
   document.getElementById('det-batidas').textContent='0';
   document.getElementById('det-tempo').textContent='0s';
   document.getElementById('det-ppm').textContent='—';
+  S.pulseTimes=[]; S.micAnalysis=null; S.noiseFloor=0; S.peakLevel=0; S.rmsSmooth=0;
+  atualizarDepuracaoUI(null);
   document.getElementById('mic-dot').className='mic-dot';
   document.getElementById('mic-status-txt').innerHTML='<strong>Microfone inativo</strong>';
   pararMic();pararCrono();pararSomPadrao();
