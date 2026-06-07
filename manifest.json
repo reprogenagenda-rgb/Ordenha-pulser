@@ -1,0 +1,26 @@
+{
+  "name": "Teste Pulsador Balde ao Pé",
+  "short_name": "Pulsador",
+  "description": "App de campo para medir pulsadas do pulsador de ordenhadeira balde ao pé.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#111314",
+  "theme_color": "#1e7e34",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

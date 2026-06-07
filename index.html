@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Teste Pulsador v2.3 — Balde ao Pé</title>
+<meta name="theme-color" content="#1e7e34">
+<meta name="description" content="App offline de campo para medir pulsadas do pulsador de ordenhadeira balde ao pé.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+:root{
+  --verde:#1e7e34;--verde-cl:#28a745;--verde-neon:#4ddb6e;
+  --amarelo:#e0a800;--amarelo-cl:#ffc107;
+  --vermelho:#c0392b;--vermelho-cl:#e74c3c;
+  --laranja:#fd7e14;
+  --cinza:#6c757d;--cinza-cl:#adb5bd;
+  --bg:#111314;--bg2:#1a1d1f;--bg3:#222629;
+  --borda:rgba(255,255,255,0.07);
+  --texto:#e8eaed;--texto2:rgba(255,255,255,0.55);
+  --fd:Impact,'Arial Narrow','Segoe UI Condensed',Arial,sans-serif;
+  --fm:'Courier New',Consolas,monospace;
+  --fb:Arial,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--texto);font-family:var(--fb);font-size:16px;}
+body{display:flex;flex-direction:column;min-height:100vh;}
+
+/* HEADER */
+.hdr{background:var(--verde);padding:16px 18px;display:flex;align-items:center;gap:12px;
+  box-shadow:0 2px 16px rgba(0,0,0,0.5);position:sticky;top:0;z-index:100;
+  background-image:repeating-linear-gradient(45deg,transparent,transparent 8px,rgba(0,0,0,0.06) 8px,rgba(0,0,0,0.06) 16px);}
+.hdr-icon{font-size:34px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.4));}
+.hdr h1{font-family:var(--fd);font-size:24px;letter-spacing:2px;color:#fff;line-height:1;}
+.hdr p{font-family:var(--fm);font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:2px;margin-top:3px;text-transform:uppercase;}
+.hdr-badge{margin-left:auto;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.2);
+  padding:4px 10px;border-radius:4px;font-family:var(--fm);font-size:9px;color:var(--verde-neon);letter-spacing:2px;white-space:nowrap;}
+.hdr-v2{background:rgba(77,219,110,0.2);border:1px solid var(--verde-neon);color:var(--verde-neon);
+  padding:3px 8px;border-radius:3px;font-family:var(--fm);font-size:9px;letter-spacing:1px;margin-left:6px;}
+
+/* TABS */
+.tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--borda);}
+.tab{flex:1;padding:12px 4px;text-align:center;font-family:var(--fm);font-size:10px;letter-spacing:1px;
+  color:var(--texto2);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;text-transform:uppercase;}
+.tab.on{color:var(--verde-neon);border-bottom-color:var(--verde-neon);}
+
+/* CONTEÚDO */
+main{flex:1;overflow-y:auto;}
+.tela{display:none;padding:18px 14px 90px;max-width:600px;margin:0 auto;}
+.tela.on{display:block;}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--borda);border-radius:10px;padding:18px;margin-bottom:14px;}
+.ctitulo{font-family:var(--fd);font-size:17px;letter-spacing:1px;color:var(--texto);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ctitulo span{font-size:18px;}
+
+/* CAMPO */
+.f{margin-bottom:12px;}
+.f label{display:block;font-family:var(--fm);font-size:10px;letter-spacing:1px;color:var(--texto2);text-transform:uppercase;margin-bottom:5px;}
+.f input,.f select,.f textarea{width:100%;background:var(--bg3);border:1px solid var(--borda);border-radius:6px;
+  color:var(--texto);font-family:var(--fb);font-size:14px;padding:11px 13px;outline:none;transition:border .2s;-webkit-appearance:none;}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--verde-cl);}
+.f textarea{resize:vertical;min-height:60px;}
+
+/* BOTÕES */
+.btn{display:block;width:100%;padding:15px;border-radius:8px;border:none;font-family:var(--fd);
+  font-size:20px;letter-spacing:2px;cursor:pointer;transition:all .2s;text-align:center;margin-bottom:10px;}
+.btn-v{background:var(--verde-cl);color:#fff;box-shadow:0 4px 14px rgba(40,167,69,0.3);}
+.btn-v:hover{background:var(--verde-neon);color:#000;}
+.btn-c{background:var(--bg3);color:var(--texto2);border:1px solid var(--borda);}
+.btn-c:hover{color:var(--texto);}
+.btn-r{background:var(--vermelho);color:#fff;}
+.btn-r:hover{background:var(--vermelho-cl);}
+.btn-sm{padding:9px 16px;font-size:14px;width:auto;display:inline-block;margin:3px;}
+.btn-mic{background:linear-gradient(135deg,#0f3f1f,#1a6b30);border:2px solid var(--verde-neon);
+  color:var(--verde-neon);font-size:18px;box-shadow:0 0 20px rgba(77,219,110,0.2);}
+.btn-mic:hover{box-shadow:0 0 30px rgba(77,219,110,0.4);}
+.btn-mic.ativo{background:linear-gradient(135deg,#3f0f0f,#6b1a1a);border-color:var(--vermelho-cl);
+  color:var(--vermelho-cl);box-shadow:0 0 20px rgba(231,76,60,0.3);animation:pulsebtn 1.2s ease-in-out infinite;}
+@keyframes pulsebtn{0%,100%{box-shadow:0 0 20px rgba(231,76,60,0.3);}50%{box-shadow:0 0 40px rgba(231,76,60,0.6);}}
+
+/* MODOS */
+.modos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
+.modo{padding:14px 6px;border-radius:8px;border:2px solid var(--borda);background:var(--bg3);
+  color:var(--texto2);cursor:pointer;text-align:center;transition:all .2s;font-family:var(--fm);font-size:10px;letter-spacing:1px;}
+.modo.on{border-color:var(--verde-neon);background:rgba(77,219,110,0.08);color:var(--verde-neon);}
+.modo strong{display:block;font-family:var(--fd);font-size:26px;letter-spacing:1px;color:inherit;margin-bottom:1px;}
+
+/* MÉTODO TOGGLE */
+.metodo-toggle{display:flex;background:var(--bg3);border:1px solid var(--borda);border-radius:8px;padding:4px;margin-bottom:16px;gap:4px;}
+.mtbtn{flex:1;padding:10px;border-radius:6px;border:none;background:transparent;color:var(--texto2);
+  font-family:var(--fm);font-size:11px;letter-spacing:1px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.mtbtn.on{background:var(--verde);color:#fff;}
+
+/* CRONO */
+.crono{background:var(--bg);border:2px solid var(--borda);border-radius:12px;padding:24px 14px;text-align:center;margin:14px 0;}
+.crono-t{font-family:var(--fd);font-size:66px;color:var(--verde-neon);letter-spacing:4px;line-height:1;}
+.crono-l{font-family:var(--fm);font-size:10px;color:var(--texto2);letter-spacing:2px;margin-top:4px;text-transform:uppercase;}
+.crono-instr{background:rgba(77,219,110,0.06);border-left:3px solid var(--verde-cl);
+  padding:10px 14px;border-radius:0 6px 6px 0;margin:10px 0;
+  font-family:var(--fm);font-size:11px;color:var(--texto2);line-height:1.6;}
+.crono-instr strong{color:var(--verde-neon);}
+
+/* CAMPO PULSADAS */
+.cpuls{background:var(--bg);border:2px solid var(--verde-cl);border-radius:8px;padding:14px;text-align:center;margin:10px 0;}
+.cpuls label{font-family:var(--fm);font-size:11px;letter-spacing:1px;color:var(--texto2);text-transform:uppercase;display:block;margin-bottom:8px;}
+.cpuls input{width:110px;background:transparent;border:none;border-bottom:3px solid var(--verde-neon);
+  color:var(--verde-neon);font-family:var(--fd);font-size:52px;text-align:center;outline:none;padding:0;}
+
+/* ── MÓDULO MICROFONE ── */
+.mic-container{margin-top:6px;}
+.mic-status-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:var(--bg);border:1px solid var(--borda);border-radius:8px;margin-bottom:10px;}
+.mic-dot{width:10px;height:10px;border-radius:50%;background:var(--cinza);flex-shrink:0;transition:background .3s;}
+.mic-dot.ouvindo{background:var(--vermelho-cl);animation:piscar .7s ease-in-out infinite;}
+.mic-dot.ok{background:var(--verde-neon);}
+@keyframes piscar{0%,100%{opacity:1;}50%{opacity:.3;}}
+.mic-status-txt{font-family:var(--fm);font-size:11px;color:var(--texto2);letter-spacing:1px;flex:1;}
+.mic-status-txt strong{color:var(--texto);}
+
+/* CANVAS WAVEFORM */
+.wave-wrap{background:var(--bg);border:1px solid var(--borda);border-radius:8px;overflow:hidden;margin-bottom:10px;position:relative;}
+canvas#waveCanvas{display:block;width:100%;height:80px;}
+.wave-label{position:absolute;top:6px;left:10px;font-family:var(--fm);font-size:9px;
+  color:rgba(255,255,255,0.25);letter-spacing:1px;text-transform:uppercase;}
+
+/* PAINEL DETECÇÃO */
+.det-painel{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
+.det-box{background:var(--bg);border:1px solid var(--borda);border-radius:8px;padding:12px 8px;text-align:center;}
+.det-val{font-family:var(--fd);font-size:30px;color:var(--verde-neon);line-height:1;}
+.det-lbl{font-family:var(--fm);font-size:9px;color:var(--texto2);letter-spacing:1px;text-transform:uppercase;margin-top:3px;}
+
+/* LIMIAR */
+.limiar-wrap{padding:10px 14px;background:var(--bg);border:1px solid var(--borda);border-radius:8px;margin-bottom:10px;}
+.limiar-wrap label{font-family:var(--fm);font-size:10px;letter-spacing:1px;color:var(--texto2);text-transform:uppercase;
+  display:flex;justify-content:space-between;margin-bottom:8px;}
+.limiar-wrap label span{color:var(--verde-neon);}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;background:var(--bg3);
+  border-radius:3px;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;
+  background:var(--verde-neon);border-radius:50%;cursor:pointer;}
+
+/* PPM GRANDE */
+.ppm-grande{text-align:center;margin:8px 0;}
+.ppm-num{font-family:var(--fd);font-size:62px;color:var(--verde-neon);line-height:1;}
+.ppm-lbl{font-family:var(--fm);font-size:11px;color:var(--texto2);letter-spacing:2px;text-transform:uppercase;}
+
+/* STATUS CHIP */
+.schip{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:50px;
+  font-family:var(--fd);font-size:17px;letter-spacing:2px;margin-bottom:10px;}
+.sv{background:rgba(40,167,69,0.2);color:var(--verde-neon);border:1px solid var(--verde-cl);}
+.sa{background:rgba(255,193,7,0.15);color:var(--amarelo-cl);border:1px solid var(--amarelo);}
+.sl{background:rgba(253,126,20,0.15);color:var(--laranja);border:1px solid var(--laranja);}
+.sr{background:rgba(192,57,43,0.2);color:var(--vermelho-cl);border:1px solid var(--vermelho);}
+.sc{background:rgba(108,117,125,0.2);color:var(--cinza-cl);border:1px solid var(--cinza);}
+
+/* RESULTADO */
+.rbox{background:var(--bg2);border:1px solid var(--borda);border-radius:10px;padding:20px 16px;margin-bottom:12px;}
+.rl{display:flex;justify-content:space-between;align-items:center;padding:7px 0;
+  border-bottom:1px solid var(--borda);font-size:12px;}
+.rl:last-child{border-bottom:none;}
+.rk{color:var(--texto2);font-family:var(--fm);font-size:10px;letter-spacing:1px;text-transform:uppercase;}
+.rv{color:var(--texto);font-weight:600;text-align:right;max-width:60%;}
+.abox{border-left:4px solid var(--amarelo-cl);background:rgba(255,193,7,0.07);
+  padding:10px 14px;border-radius:0 6px 6px 0;margin:6px 0;font-size:12px;color:var(--texto2);line-height:1.6;}
+.abox.verm{border-left-color:var(--vermelho-cl);background:rgba(192,57,43,0.07);}
+.abox strong{display:block;margin-bottom:3px;font-family:var(--fm);font-size:10px;letter-spacing:1px;text-transform:uppercase;}
+.abox.verm strong{color:var(--vermelho-cl);}
+.abox:not(.verm) strong{color:var(--amarelo-cl);}
+.recbox{background:rgba(77,219,110,0.06);border:1px solid rgba(77,219,110,0.2);
+  border-radius:8px;padding:14px;margin-top:10px;font-size:12px;line-height:1.7;color:var(--texto2);}
+.recbox strong{color:var(--verde-neon);font-family:var(--fm);font-size:10px;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px;}
+.avt{background:rgba(108,117,125,0.1);border:1px solid var(--cinza);border-radius:6px;
+  padding:10px 12px;margin-top:12px;font-family:var(--fm);font-size:10px;color:var(--cinza-cl);line-height:1.6;letter-spacing:.5px;}
+
+/* OPÇÕES */
+.ogrp{display:flex;flex-direction:column;gap:7px;}
+.oitem{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--borda);
+  border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .2s;}
+.oitem:hover{border-color:var(--verde-cl);}
+.oitem.on{border-color:var(--verde-neon);background:rgba(77,219,110,0.07);}
+.oitem.onal{border-color:var(--vermelho-cl);background:rgba(192,57,43,0.07);}
+.ocir{width:20px;height:20px;border-radius:50%;border:2px solid var(--borda);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:11px;}
+.oitem.on .ocir{background:var(--verde-neon);border-color:var(--verde-neon);color:#000;}
+.oitem.onal .ocir{background:var(--vermelho-cl);border-color:var(--vermelho-cl);color:#fff;}
+.olbl{font-size:13px;flex:1;}
+
+/* HISTÓRICO */
+.hfiltros{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.hfinput{flex:1;min-width:110px;background:var(--bg3);border:1px solid var(--borda);border-radius:6px;
+  color:var(--texto);font-size:13px;padding:9px 11px;outline:none;font-family:var(--fb);}
+.hcard{background:var(--bg2);border:1px solid var(--borda);border-radius:8px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border .2s;}
+.hcard:hover{border-color:var(--verde-cl);}
+.hctop{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;}
+.hcprop{font-weight:600;font-size:13px;}
+.hcdata{font-family:var(--fm);font-size:10px;color:var(--texto2);}
+.hcinfo{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.htag{font-family:var(--fm);font-size:9px;padding:2px 8px;border-radius:3px;letter-spacing:1px;}
+.hdel{background:transparent;border:none;color:var(--cinza-cl);cursor:pointer;font-size:17px;padding:2px 5px;border-radius:3px;transition:color .2s;}
+.hdel:hover{color:var(--vermelho-cl);}
+.vazio{text-align:center;color:var(--texto2);font-family:var(--fm);font-size:12px;padding:36px 0;letter-spacing:1px;}
+.expbtns{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;}
+.sep{height:1px;background:var(--borda);margin:14px 0;}
+.stit{font-family:var(--fm);font-size:10px;letter-spacing:2px;color:var(--texto2);text-transform:uppercase;margin:14px 0 8px;}
+.numg{font-family:var(--fd);font-size:52px;color:var(--verde-neon);text-align:center;line-height:1;}
+.numl{font-family:var(--fm);font-size:11px;color:var(--texto2);text-align:center;letter-spacing:2px;text-transform:uppercase;}
+
+/* MODAL */
+.movl{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;overflow-y:auto;padding:16px;}
+.movl.on{display:flex;align-items:flex-start;justify-content:center;}
+.mbox{background:var(--bg2);border:1px solid var(--borda);border-radius:12px;width:100%;max-width:540px;padding:20px;margin:auto;}
+.mtit{font-family:var(--fd);font-size:20px;letter-spacing:2px;margin-bottom:14px;color:var(--texto);}
+.mclose{float:right;background:none;border:none;color:var(--texto2);font-size:20px;cursor:pointer;line-height:1;padding:0 3px;}
+
+/* ANIMAÇÕES */
+@keyframes pulsar{0%,100%{opacity:1;}50%{opacity:.4;}}
+.pulsando{animation:pulsar 1s ease-in-out infinite;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.fu{animation:fadeUp .3s ease;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px;}
+@media(max-width:380px){.crono-t{font-size:52px;}.ppm-num{font-size:48px;}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-icon">🥛</div>
+  <div>
+    <h1>Teste Pulsador</h1>
+    <p>Balde ao Pé · Diagnóstico de Campo</p>
+  </div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+    <span class="hdr-v2">v2.3</span>
+    <span class="hdr-badge">Reprogen</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab on" onclick="irTela('teste')">Teste</div>
+  <div class="tab" onclick="irTela('resultado')">Resultado</div>
+  <div class="tab" onclick="irTela('historico')">Histórico</div>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════
+     TELA TESTE
+══════════════════════════════════ -->
+<div class="tela on" id="tela-teste">
+
+  <div class="card fu">
+    <div class="ctitulo"><span>🏠</span> Identificação</div>
+    <div class="f"><label>Propriedade</label><input type="text" id="propriedade" placeholder="Ex: Fazenda Chão Preto"></div>
+    <div class="f"><label>Data</label><input type="date" id="data"></div>
+    <div class="f"><label>Responsável</label><input type="text" id="responsavel" placeholder="Nome do vaqueiro/técnico"></div>
+    <div class="f"><label>Equipamento</label>
+      <select id="tipo-eq">
+        <option>Ordenhadeira balde ao pé</option>
+        <option>Canalizada</option>
+        <option>Outro</option>
+      </select>
+    </div>
+    <div class="f"><label>Marca/Modelo (opcional)</label><input type="text" id="modelo" placeholder="Ex: DeLaval, Bovicontrol..."></div>
+    <div class="f"><label>Nº de Conjuntos</label><input type="number" id="num-conj" value="1" min="1" max="20"></div>
+    <div class="f"><label>Observação (opcional)</label><textarea id="obs" placeholder="Histórico de manutenção, condições..."></textarea></div>
+  </div>
+
+  <!-- MÉTODO -->
+  <div class="card fu">
+    <div class="ctitulo"><span>⚙️</span> Método de Medição</div>
+    <div class="metodo-toggle">
+      <button class="mtbtn on" id="btn-met-manual" onclick="setMetodo('manual')">✋ Manual</button>
+      <button class="mtbtn" id="btn-met-mic" onclick="setMetodo('mic')">🎙️ Microfone</button>
+    </div>
+
+    <!-- ── MÉTODO MANUAL ── -->
+    <div id="painel-manual">
+      <div class="modos" id="modos-grid">
+        <div class="modo on" onclick="selModo(15,4,this)"><strong>15s</strong>× 4</div>
+        <div class="modo" onclick="selModo(30,2,this)"><strong>30s</strong>× 2</div>
+        <div class="modo" onclick="selModo(60,1,this)"><strong>60s</strong>× 1</div>
+      </div>
+      <div class="crono">
+        <div class="crono-t" id="crono-display">15</div>
+        <div class="crono-l" id="crono-label">Pronto para iniciar</div>
+      </div>
+      <div class="crono-instr"><strong>Como contar:</strong> Observe ou escute o pulsador. Cada abertura + fechamento das teteiras = <strong>1 ciclo</strong>. Conte durante o tempo escolhido.</div>
+      <button class="btn btn-v" id="btn-crono" onclick="toggleCrono()">▶ INICIAR CONTAGEM</button>
+      <div class="cpuls">
+        <label>Pulsadas contadas no tempo</label>
+        <input type="number" id="puls-manual" min="0" max="200" placeholder="0" oninput="calcPPM()">
+      </div>
+      <div id="ppm-manual-res" style="display:none;margin-top:6px;">
+        <div class="ppm-num" id="ppm-manual-val">—</div>
+        <div class="ppm-lbl">pulsadas / minuto</div>
+      </div>
+    </div>
+
+    <!-- ── MÉTODO MICROFONE ── -->
+    <div id="painel-mic" style="display:none;">
+      <div class="crono-instr" style="margin-bottom:12px;">
+        🎙️ O app vai <strong>ouvir o pulsador</strong> pelo microfone e contar os ciclos automaticamente. Aproxime o celular do equipamento.
+      </div>
+
+      <div class="mic-status-bar">
+        <div class="mic-dot" id="mic-dot"></div>
+        <div class="mic-status-txt" id="mic-status-txt"><strong>Microfone inativo</strong></div>
+      </div>
+
+      <!-- Forma de onda -->
+      <div class="wave-wrap">
+        <div class="wave-label">sinal de áudio</div>
+        <canvas id="waveCanvas" height="80"></canvas>
+      </div>
+
+      <!-- Limiar de sensibilidade -->
+      <div class="limiar-wrap">
+        <label>Sensibilidade (limiar de detecção) <span id="limiar-val">30%</span></label>
+        <input type="range" id="limiar-range" min="5" max="80" value="30" oninput="atualizarLimiar()">
+      </div>
+
+      <!-- Painel detecção -->
+      <div class="det-painel">
+        <div class="det-box">
+          <div class="det-val" id="det-batidas">0</div>
+          <div class="det-lbl">batidas</div>
+        </div>
+        <div class="det-box">
+          <div class="det-val" id="det-tempo">0s</div>
+          <div class="det-lbl">tempo</div>
+        </div>
+        <div class="det-box">
+          <div class="det-val" id="det-ppm">—</div>
+          <div class="det-lbl">ppm ao vivo</div>
+        </div>
+      </div>
+
+      <div class="mic-container">
+        <button class="btn btn-mic" id="btn-mic" onclick="toggleMic()">🎙️ INICIAR CAPTURA</button>
+        <button class="btn btn-c" onclick="confirmarMic()" id="btn-confirmar-mic" style="display:none;">✔ CONFIRMAR RESULTADO</button>
+      </div>
+
+      <div id="ppm-mic-res" style="display:none;margin-top:6px;">
+        <div class="ppm-num" id="ppm-mic-val">—</div>
+        <div class="ppm-lbl">pulsadas / minuto (capturado)</div>
+      </div>
+
+      <div class="avt" style="margin-top:10px;">
+        ⚠ A captura por microfone depende do ambiente sonoro. Reduzir ruídos externos melhora a precisão. Ajuste a sensibilidade conforme o equipamento.
+      </div>
+    </div>
+  </div>
+
+  <!-- REGULARIDADE -->
+  <div class="card fu">
+    <div class="ctitulo"><span>🔊</span> Regularidade do Som</div>
+    <p style="font-size:12px;color:var(--texto2);margin-bottom:12px;">Como você descreve o ritmo do pulsador?</p>
+    <div class="ogrp" id="grp-reg">
+      <div class="oitem" onclick="selOpcao(this,'reg','Regular')"><div class="ocir"></div><div class="olbl">Regular — ritmo constante e igual</div></div>
+      <div class="oitem" onclick="selOpcao(this,'reg','Falhando')"><div class="ocir"></div><div class="olbl">Falhando — para e volta, engasga</div></div>
+      <div class="oitem" onclick="selOpcao(this,'reg','Oscilando')"><div class="ocir"></div><div class="olbl">Oscilando — ritmo variável</div></div>
+      <div class="oitem" onclick="selOpcao(this,'reg','Um lado não pulsa')"><div class="ocir"></div><div class="olbl">Um lado pulsa, o outro não</div></div>
+      <div class="oitem" onclick="selOpcao(this,'reg','Não sei avaliar')"><div class="ocir"></div><div class="olbl">Não sei avaliar</div></div>
+    </div>
+  </div>
+
+  <!-- COMPLEMENTAR -->
+  <div class="card fu">
+    <div class="ctitulo"><span>🔍</span> Avaliação Complementar</div>
+    <div class="stit">Vácuo estável?</div>
+    <div class="ogrp" id="grp-vacuo">
+      <div class="oitem" onclick="selOpcao(this,'vacuo','Sim')"><div class="ocir"></div><div class="olbl">Sim</div></div>
+      <div class="oitem" onclick="selOpcao(this,'vacuo','Não')"><div class="ocir"></div><div class="olbl">Não — oscila ou fraco</div></div>
+      <div class="oitem" onclick="selOpcao(this,'vacuo','Não medido')"><div class="ocir"></div><div class="olbl">Não foi medido</div></div>
+    </div>
+    <div class="sep"></div>
+    <div class="stit">Estado das teteiras</div>
+    <div class="ogrp" id="grp-tet">
+      <div class="oitem" onclick="selOpcao(this,'tet','Bom estado')"><div class="ocir"></div><div class="olbl">Bom estado</div></div>
+      <div class="oitem" onclick="selOpcao(this,'tet','Ressecadas')"><div class="ocir"></div><div class="olbl">Ressecadas</div></div>
+      <div class="oitem" onclick="selOpcao(this,'tet','Rachadas')"><div class="ocir"></div><div class="olbl">Rachadas</div></div>
+      <div class="oitem" onclick="selOpcao(this,'tet','Deformadas')"><div class="ocir"></div><div class="olbl">Deformadas</div></div>
+      <div class="oitem" onclick="selOpcao(this,'tet','Não avaliado')"><div class="ocir"></div><div class="olbl">Não avaliado</div></div>
+    </div>
+    <div class="sep"></div>
+    <div class="stit">Queda de teteira / entrada de ar?</div>
+    <div class="ogrp" id="grp-ar">
+      <div class="oitem" onclick="selOpcao(this,'ar','Sim')"><div class="ocir"></div><div class="olbl">Sim</div></div>
+      <div class="oitem" onclick="selOpcao(this,'ar','Não')"><div class="ocir"></div><div class="olbl">Não</div></div>
+      <div class="oitem" onclick="selOpcao(this,'ar','Às vezes')"><div class="ocir"></div><div class="olbl">Às vezes</div></div>
+    </div>
+    <div class="sep"></div>
+    <div class="stit">Pulsador foi limpo recentemente?</div>
+    <div class="ogrp" id="grp-limp">
+      <div class="oitem" onclick="selOpcao(this,'limp','Sim')"><div class="ocir"></div><div class="olbl">Sim</div></div>
+      <div class="oitem" onclick="selOpcao(this,'limp','Não')"><div class="ocir"></div><div class="olbl">Não</div></div>
+      <div class="oitem" onclick="selOpcao(this,'limp','Não sei')"><div class="ocir"></div><div class="olbl">Não sei</div></div>
+    </div>
+  </div>
+
+  <button class="btn btn-v" onclick="gerarResultado()">✔ GERAR RESULTADO</button>
+  <button class="btn btn-c" onclick="limpar()">↺ Limpar</button>
+</div>
+
+<!-- ══════════════════════════════════
+     TELA RESULTADO
+══════════════════════════════════ -->
+<div class="tela" id="tela-resultado">
+  <div id="resultado-conteudo">
+    <div class="vazio">Preencha o teste e clique em<br>GERAR RESULTADO</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TELA HISTÓRICO
+══════════════════════════════════ -->
+<div class="tela" id="tela-historico">
+  <div class="card">
+    <div class="ctitulo"><span>📋</span> Histórico de Testes</div>
+    <div class="hfiltros">
+      <input class="hfinput" type="text" id="fprop" placeholder="🔍 Propriedade..." oninput="renderHist()">
+      <input class="hfinput" type="date" id="fdata" oninput="renderHist()" style="max-width:155px;">
+    </div>
+    <div class="expbtns">
+      <button class="btn btn-c btn-sm" onclick="expCSV()">⬇ CSV</button>
+      <button class="btn btn-c btn-sm" onclick="expJSON()">⬇ JSON</button>
+      <button class="btn btn-c btn-sm" onclick="imprimirRel()">🖨 Relatório</button>
+    </div>
+    <div id="lista-hist"></div>
+  </div>
+</div>
+
+</main>
+
+<!-- MODAL -->
+<div class="movl" id="modal">
+  <div class="mbox">
+    <button class="mclose" onclick="fecharModal()">✕</button>
+    <div class="mtit">Detalhe do Teste</div>
+    <div id="modal-c"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  ESTADO
+// ══════════════════════════════════════════════
+var S = {
+  metodo: 'manual',
+  modoDur: 15, modoMul: 4,
+  cronoTimer: null, cronoAtivo: false, cronoRest: 15,
+  opcoes: {},
+  ppmFinal: null,
+  // Microfone
+  audioCtx: null, analyser: null, stream: null,
+  micAtivo: false, micTimer: null,
+  batidas: 0, micTempo: 0, micTempoTimer: null,
+  limiar: 0.30,
+  emDeteccao: false, cooldown: false,
+  animFrame: null,
+  waveData: null
+};
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+window.onload = function() {
+  var h = new Date();
+  var dd = String(h.getDate()).padStart(2,'0');
+  var mm = String(h.getMonth()+1).padStart(2,'0');
+  document.getElementById('data').value = h.getFullYear()+'-'+mm+'-'+dd;
+  renderHist();
+  // canvas responsivo
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+};
+
+function resizeCanvas() {
+  var c = document.getElementById('waveCanvas');
+  if (c) {
+    var w = c.parentElement.offsetWidth;
+    c.width = w || 300;
+    c.height = 80;
+  }
+}
+
+// ══════════════════════════════════════════════
+//  NAVEGAÇÃO
+// ══════════════════════════════════════════════
+function irTela(id) {
+  document.querySelectorAll('.tela').forEach(function(t){ t.classList.remove('on'); });
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('on'); });
+  document.getElementById('tela-'+id).classList.add('on');
+  var idx = {teste:0,resultado:1,historico:2}[id];
+  document.querySelectorAll('.tab')[idx].classList.add('on');
+  if (id === 'historico') renderHist();
+}
+
+// ══════════════════════════════════════════════
+//  MÉTODO (manual / mic)
+// ══════════════════════════════════════════════
+function setMetodo(m) {
+  S.metodo = m;
+  document.getElementById('painel-manual').style.display = m === 'manual' ? '' : 'none';
+  document.getElementById('painel-mic').style.display = m === 'mic' ? '' : 'none';
+  document.getElementById('btn-met-manual').classList.toggle('on', m === 'manual');
+  document.getElementById('btn-met-mic').classList.toggle('on', m === 'mic');
+  if (m === 'manual') pararMic();
+}
+
+// ══════════════════════════════════════════════
+//  CRONÔMETRO MANUAL
+// ══════════════════════════════════════════════
+function selModo(dur, mul, el) {
+  document.querySelectorAll('.modo').forEach(function(b){ b.classList.remove('on'); });
+  el.classList.add('on');
+  S.modoDur = dur; S.modoMul = mul;
+  pararCrono();
+  document.getElementById('crono-display').textContent = String(dur).padStart(2,'0');
+  document.getElementById('crono-label').textContent = 'Pronto para iniciar';
+  document.getElementById('btn-crono').textContent = '▶ INICIAR CONTAGEM';
+  calcPPM();
+}
+
+function toggleCrono() {
+  if (S.cronoAtivo) { pararCrono(); return; }
+  S.cronoAtivo = true;
+  S.cronoRest = S.modoDur;
+  document.getElementById('btn-crono').textContent = '⏹ PARAR';
+  document.getElementById('crono-display').classList.add('pulsando');
+  document.getElementById('crono-label').textContent = 'Contando... observe o pulsador!';
+  S.cronoTimer = setInterval(function() {
+    S.cronoRest--;
+    document.getElementById('crono-display').textContent = String(S.cronoRest).padStart(2,'0');
+    if (S.cronoRest <= 0) {
+      pararCrono();
+      document.getElementById('crono-label').textContent = '✔ Concluído — insira o nº de pulsadas';
+      document.getElementById('puls-manual').focus();
+    }
+  }, 1000);
+}
+
+function pararCrono() {
+  if (S.cronoTimer) clearInterval(S.cronoTimer);
+  S.cronoTimer = null; S.cronoAtivo = false;
+  document.getElementById('crono-display').classList.remove('pulsando');
+  document.getElementById('btn-crono').textContent = '▶ INICIAR CONTAGEM';
+}
+
+function calcPPM() {
+  var v = parseInt(document.getElementById('puls-manual').value, 10);
+  var el = document.getElementById('ppm-manual-res');
+  if (isNaN(v) || v < 0) { el.style.display = 'none'; S.ppmFinal = null; return; }
+  var ppm = v * S.modoMul;
+  document.getElementById('ppm-manual-val').textContent = ppm;
+  el.style.display = 'block';
+  S.ppmFinal = ppm;
+}
+
+// ══════════════════════════════════════════════
+//  MICROFONE — WEB AUDIO API
+// ══════════════════════════════════════════════
+function toggleMic() {
+  if (S.micAtivo) { pararMic(); return; }
+  iniciarMic();
+}
+
+function iniciarMic() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert('Microfone não suportado neste navegador.\nUse Chrome no Android ou abra o arquivo via HTTPS/GitHub Pages.');
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then(function(stream) {
+      S.stream = stream;
+      S.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      var source = S.audioCtx.createMediaStreamSource(stream);
+      S.analyser = S.audioCtx.createAnalyser();
+      S.analyser.fftSize = 256;
+      S.analyser.smoothingTimeConstant = 0.3;
+      source.connect(S.analyser);
+      S.waveData = new Uint8Array(S.analyser.fftSize);
+      S.micAtivo = true;
+      S.batidas = 0;
+      S.micTempo = 0;
+      S.cooldown = false;
+      // UI
+      setMicUI(true);
+      // Timer de tempo
+      S.micTempoTimer = setInterval(function() {
+        S.micTempo++;
+        document.getElementById('det-tempo').textContent = S.micTempo + 's';
+        atualizarPPMLive();
+      }, 1000);
+      // Loop de análise
+      loopMic();
+    })
+    .catch(function(err) {
+      var msg = 'Erro ao acessar microfone.';
+      if (err.name === 'NotAllowedError') msg = 'Permissão negada. Libere o microfone nas configurações do navegador.';
+      else if (err.name === 'NotFoundError') msg = 'Nenhum microfone encontrado neste dispositivo.';
+      alert(msg);
+    });
+}
+
+function loopMic() {
+  if (!S.micAtivo) return;
+  S.analyser.getByteTimeDomainData(S.waveData);
+  desenharOnda();
+  detectarPico();
+  S.animFrame = requestAnimationFrame(loopMic);
+}
+
+function detectarPico() {
+  var buf = S.waveData;
+  var len = buf.length;
+  var soma = 0;
+  for (var i = 0; i < len; i++) {
+    var v = (buf[i] - 128) / 128.0;
+    soma += v * v;
+  }
+  var rms = Math.sqrt(soma / len); // 0.0 – 1.0
+
+  if (rms > S.limiar && !S.cooldown) {
+    S.batidas++;
+    document.getElementById('det-batidas').textContent = S.batidas;
+    S.cooldown = true;
+    // Cooldown mínimo entre batidas: 300ms (equivale a máx ~200 ppm)
+    setTimeout(function() { S.cooldown = false; }, 300);
+    atualizarPPMLive();
+  }
+}
+
+function atualizarPPMLive() {
+  if (S.micTempo < 3) { document.getElementById('det-ppm').textContent = '—'; return; }
+  var ppm = Math.round((S.batidas / S.micTempo) * 60);
+  document.getElementById('det-ppm').textContent = ppm;
+}
+
+function desenharOnda() {
+  var c = document.getElementById('waveCanvas');
+  var ctx = c.getContext('2d');
+  var W = c.width, H = c.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Fundo
+  ctx.fillStyle = '#111314';
+  ctx.fillRect(0, 0, W, H);
+
+  // Linha limiar
+  var limiarY = H/2 - (S.limiar * H/2);
+  ctx.strokeStyle = 'rgba(231,76,60,0.3)';
+  ctx.setLineDash([4, 4]);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, limiarY); ctx.lineTo(W, limiarY);
+  ctx.moveTo(0, H - limiarY); ctx.lineTo(W, H - limiarY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Onda
+  ctx.strokeStyle = '#4ddb6e';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  var slice = W / S.waveData.length;
+  var x = 0;
+  for (var i = 0; i < S.waveData.length; i++) {
+    var v = S.waveData[i] / 128.0;
+    var y = (v * H / 2);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+    x += slice;
+  }
+  ctx.stroke();
+}
+
+function atualizarLimiar() {
+  var v = parseInt(document.getElementById('limiar-range').value, 10);
+  S.limiar = v / 100;
+  document.getElementById('limiar-val').textContent = v + '%';
+}
+
+function pararMic() {
+  S.micAtivo = false;
+  if (S.animFrame) cancelAnimationFrame(S.animFrame);
+  if (S.micTempoTimer) clearInterval(S.micTempoTimer);
+  if (S.stream) { S.stream.getTracks().forEach(function(t){ t.stop(); }); S.stream = null; }
+  if (S.audioCtx) { try { S.audioCtx.close(); } catch(e){} S.audioCtx = null; }
+  S.analyser = null;
+  setMicUI(false);
+  // Limpar canvas
+  var c = document.getElementById('waveCanvas');
+  if (c) { var ctx = c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); }
+}
+
+function setMicUI(ativo) {
+  var dot = document.getElementById('mic-dot');
+  var txt = document.getElementById('mic-status-txt');
+  var btn = document.getElementById('btn-mic');
+  var btnConf = document.getElementById('btn-confirmar-mic');
+  if (ativo) {
+    dot.className = 'mic-dot ouvindo';
+    txt.innerHTML = '<strong>Ouvindo pulsador...</strong> aguarde ao menos 15 segundos';
+    btn.textContent = '⏹ PARAR CAPTURA';
+    btn.classList.add('ativo');
+    btnConf.style.display = 'none';
+  } else {
+    dot.className = 'mic-dot' + (S.batidas > 0 ? ' ok' : '');
+    txt.innerHTML = S.batidas > 0
+      ? '<strong>Captura concluída</strong> — ' + S.batidas + ' batidas em ' + S.micTempo + 's'
+      : '<strong>Microfone inativo</strong>';
+    btn.textContent = '🎙️ INICIAR CAPTURA';
+    btn.classList.remove('ativo');
+    if (S.batidas > 0 && S.micTempo >= 3) btnConf.style.display = '';
+  }
+}
+
+function confirmarMic() {
+  if (S.micTempo < 3 || S.batidas === 0) { alert('Capture ao menos 3 segundos para confirmar.'); return; }
+  var ppm = Math.round((S.batidas / S.micTempo) * 60);
+  S.ppmFinal = ppm;
+  document.getElementById('ppm-mic-val').textContent = ppm;
+  document.getElementById('ppm-mic-res').style.display = 'block';
+  document.getElementById('btn-confirmar-mic').style.display = 'none';
+  document.getElementById('mic-dot').className = 'mic-dot ok';
+  document.getElementById('mic-status-txt').innerHTML = '<strong>✔ PPM confirmado:</strong> ' + ppm + ' pulsadas/min';
+}
+
+// ══════════════════════════════════════════════
+//  OPÇÕES
+// ══════════════════════════════════════════════
+function selOpcao(el, grp, val) {
+  document.getElementById('grp-'+grp).querySelectorAll('.oitem').forEach(function(o){
+    o.classList.remove('on','onal');
+    o.querySelector('.ocir').textContent = '';
+  });
+  var alertas = {reg:['Falhando','Oscilando','Um lado não pulsa']};
+  var isAl = alertas[grp] && alertas[grp].indexOf(val) !== -1;
+  el.classList.add(isAl ? 'onal' : 'on');
+  el.querySelector('.ocir').textContent = '✓';
+  S.opcoes[grp] = val;
+}
+
+// ══════════════════════════════════════════════
+//  CLASSIFICAR
+// ══════════════════════════════════════════════
+function classif(ppm) {
+  if (ppm < 50) return {label:'PULSADOR LENTO',cls:'sr',
+    msg:'Pulsador abaixo da faixa prática. Pode causar ordenha demorada, esgotamento inadequado e desconforto. Revisar pulsador, mangueiras, vácuo e sujeira interna.'};
+  if (ppm <= 60) return {label:'FAIXA ACEITÁVEL',cls:'sv',
+    msg:'Resultado dentro da faixa prática para avaliação de campo. Confirmar vácuo, regularidade do som, teteiras e funcionamento dos dois lados.'};
+  if (ppm <= 65) return {label:'LIGEIRAMENTE RÁPIDO',cls:'sl',
+    msg:'Resultado um pouco acima da faixa prática. Pode depender do modelo, mas recomenda-se conferir regulagem e estabilidade.'};
+  return {label:'PULSADOR RÁPIDO',cls:'sr',
+    msg:'Pulsador acima da faixa prática. Pode prejudicar massagem do teto, aumentar risco de lesões. Avaliação técnica imediata recomendada.'};
+}
+
+// ══════════════════════════════════════════════
+//  GERAR RESULTADO
+// ══════════════════════════════════════════════
+function gerarResultado() {
+  var p = {
+    prop: document.getElementById('propriedade').value || '—',
+    data: document.getElementById('data').value || '—',
+    resp: document.getElementById('responsavel').value || '—',
+    equip: document.getElementById('tipo-eq').value,
+    modelo: document.getElementById('modelo').value || '—',
+    conj: document.getElementById('num-conj').value,
+    obs: document.getElementById('obs').value || '—',
+    metodo: S.metodo === 'mic' ? 'Microfone automático' : 'Contagem manual ('+S.modoDur+'s)'
+  };
+
+  var ppm = S.ppmFinal;
+  var cl = ppm !== null ? classif(ppm) : null;
+  var reg = S.opcoes['reg'] || '—';
+  var vacuo = S.opcoes['vacuo'] || '—';
+  var tet = S.opcoes['tet'] || '—';
+  var ar = S.opcoes['ar'] || '—';
+  var limp = S.opcoes['limp'] || '—';
+
+  // Alertas
+  var als = [];
+  if (['Falhando','Oscilando','Um lado não pulsa'].indexOf(reg) !== -1)
+    als.push('Irregularidade no ritmo. Mesmo PPM próximo do normal, há suspeita de falha funcional. Revisar mangueiras, borrachas, umidade e sujeira interna.');
+  if (vacuo === 'Não') als.push('Vácuo instável combinado com problema de pulsação eleva risco de falha na ordenha e lesão de teto.');
+  if (['Rachadas','Deformadas'].indexOf(tet) !== -1) als.push('Teteiras '+tet.toLowerCase()+' comprometem vácuo e higiene. Substituição imediata recomendada.');
+  if (ar === 'Sim' || ar === 'Às vezes') als.push('Entrada falsa de ar ou queda de teteira confirma problema no circuito de vácuo.');
+  if (limp === 'Não') als.push('Pulsador sem limpeza recente — resíduo pode estar bloqueando orifício calibrado e alterando o ritmo.');
+
+  var rec = '';
+  if (!cl) rec = 'Conclua a medição para obter a recomendação.';
+  else if (cl.cls === 'sv' && als.length === 0) rec = 'Pulsador dentro da faixa prática. Manter limpeza periódica, conferir vácuo e revisar teteiras a cada 2.500 ordenhas ou 6 meses.';
+  else if (cl.cls === 'sr' || als.length > 0) rec = 'Intervenção técnica recomendada: desmontagem e limpeza do pulsador, inspeção de membrana, válvulas e borrachas, verificação de vácuo com vacuômetro, substituição de peças desgastadas.';
+  else rec = 'Ajustar regulagem conforme manual do fabricante. Verificar vácuo e estado das teteiras.';
+
+  // Salvar
+  var reg2 = {
+    id: Date.now(), p: p, ppm: ppm !== null ? ppm : '—',
+    classif: cl ? cl.label : '—', reg: reg, vacuo: vacuo,
+    tet: tet, ar: ar, limp: limp, als: als, rec: rec
+  };
+  salvarHist(reg2);
+
+  // HTML resultado
+  var h = '<div class="fu">';
+  h += '<div class="rbox"><div class="mtit" style="font-size:18px;margin-bottom:12px">📋 Resumo</div>';
+  h += rl('Propriedade', p.prop)+rl('Data', p.data)+rl('Responsável', p.resp);
+  h += rl('Equipamento', p.equip)+rl('Método', p.metodo);
+  h += rl('Pulsadas/min', '<span style="font-family:var(--fd);font-size:24px;color:var(--verde-neon)">'+(ppm !== null ? ppm : '—')+'</span>');
+  h += '</div>';
+
+  if (cl) {
+    h += '<div style="margin-bottom:12px">';
+    h += '<div class="schip '+cl.cls+'">⚙ '+cl.label+'</div>';
+    h += '<p style="font-size:12px;color:var(--texto2);line-height:1.6;">'+cl.msg+'</p>';
+    h += '</div>';
+  }
+
+  h += '<div class="rbox">';
+  var rcls = ['Falhando','Oscilando','Um lado não pulsa'].indexOf(reg) !== -1 ? 'sr' : (reg === 'Regular' ? 'sv' : 'sc');
+  h += '<div class="ctitulo" style="margin-bottom:8px"><span>🔊</span> Regularidade</div>';
+  h += '<div class="schip '+rcls+'" style="margin-bottom:0">'+esc(reg)+'</div></div>';
+
+  h += '<div class="rbox"><div class="ctitulo" style="margin-bottom:8px"><span>🔍</span> Complementar</div>';
+  h += rl('Vácuo', vacuo)+rl('Teteiras', tet)+rl('Entrada de ar', ar)+rl('Limpeza', limp);
+  h += '</div>';
+
+  if (als.length) {
+    h += '<div class="ctitulo" style="margin:14px 0 8px"><span>⚠️</span> Alertas</div>';
+    for (var i=0; i<als.length; i++)
+      h += '<div class="abox verm"><strong>⚠ Atenção</strong>'+esc(als[i])+'</div>';
+  }
+
+  h += '<div class="recbox"><strong>✔ Recomendação Prática</strong>'+esc(rec)+'</div>';
+  h += '<div class="avt">⚠ Triagem prática de campo. Para diagnóstico completo use vacuômetro, pulsógrafo ou técnico especializado. Tomaz Pina Maia — CRMV-PA 03023-VP</div>';
+  h += '<button class="btn btn-v" style="margin-top:14px" onclick="irTela(\'teste\')">+ Novo Teste</button>';
+  h += '<button class="btn btn-c" onclick="irTela(\'historico\')">📋 Ver Histórico</button>';
+  h += '</div>';
+
+  document.getElementById('resultado-conteudo').innerHTML = h;
+  irTela('resultado');
+}
+
+function rl(k,v){ return '<div class="rl"><span class="rk">'+esc(k)+'</span><span class="rv">'+v+'</span></div>'; }
+
+// ══════════════════════════════════════════════
+//  HISTÓRICO
+// ══════════════════════════════════════════════
+var LS = 'reprogen_pulsador_v2';
+function salvarHist(r){ var h=carregarHist(); h.unshift(r); try{localStorage.setItem(LS,JSON.stringify(h));}catch(e){} }
+function carregarHist(){ try{var r=localStorage.getItem(LS);return r?JSON.parse(r):[];}catch(e){return[];} }
+
+function renderHist() {
+  var hist = carregarHist();
+  var fp = (document.getElementById('fprop').value||'').toLowerCase();
+  var fd = document.getElementById('fdata').value||'';
+  if (fp) hist = hist.filter(function(r){return r.p.prop.toLowerCase().indexOf(fp)!==-1;});
+  if (fd) hist = hist.filter(function(r){return r.p.data===fd;});
+  var el = document.getElementById('lista-hist');
+  if (!hist.length){el.innerHTML='<div class="vazio">Nenhum teste registrado</div>';return;}
+  var h='';
+  for(var i=0;i<hist.length;i++){
+    var r=hist[i];
+    var cor=r.classif.indexOf('ACEITÁVEL')!==-1?'var(--verde-neon)':
+            r.classif.indexOf('LIGEIRAMENTE')!==-1?'var(--laranja)':
+            (r.classif.indexOf('LENTO')!==-1||r.classif.indexOf('RÁPIDO')!==-1)?'var(--vermelho-cl)':'var(--cinza-cl)';
+    h+='<div class="hcard" onclick="verDet('+r.id+')">';
+    h+='<div class="hctop"><div><div class="hcprop">'+esc(r.p.prop)+'</div>';
+    h+='<div class="hcdata">'+esc(r.p.data)+' · '+esc(r.p.resp)+'</div></div>';
+    h+='<button class="hdel" onclick="event.stopPropagation();excluir('+r.id+')">🗑</button></div>';
+    h+='<div class="hcinfo">';
+    h+='<span class="htag" style="background:rgba(0,0,0,0.3);color:'+cor+';border:1px solid '+cor+'">'+esc(r.classif)+'</span>';
+    h+='<span class="htag" style="background:var(--bg3);color:var(--texto2);border:1px solid var(--borda)">'+r.ppm+' ppm</span>';
+    h+='<span class="htag" style="background:var(--bg3);color:var(--texto2);border:1px solid var(--borda)">'+esc(r.p.metodo||'—')+'</span>';
+    h+='</div></div>';
+  }
+  el.innerHTML=h;
+}
+
+function excluir(id){
+  if(!confirm('Excluir este teste?'))return;
+  var h=carregarHist().filter(function(r){return r.id!==id;});
+  try{localStorage.setItem(LS,JSON.stringify(h));}catch(e){}
+  renderHist();
+}
+
+function verDet(id){
+  var hist=carregarHist(), r=null;
+  for(var i=0;i<hist.length;i++){if(hist[i].id===id){r=hist[i];break;}}
+  if(!r)return;
+  var h='';
+  h+=rl('Propriedade',esc(r.p.prop))+rl('Data',esc(r.p.data))+rl('Responsável',esc(r.p.resp));
+  h+=rl('Equipamento',esc(r.p.equip))+rl('Método',esc(r.p.metodo||'—'));
+  h+=rl('PPM','<span style="font-family:var(--fd);font-size:22px;color:var(--verde-neon)">'+r.ppm+'</span>');
+  h+=rl('Classificação',esc(r.classif))+rl('Regularidade',esc(r.reg));
+  h+=rl('Vácuo',esc(r.vacuo))+rl('Teteiras',esc(r.tet));
+  if(r.als&&r.als.length)for(var j=0;j<r.als.length;j++)h+='<div class="abox verm" style="margin-top:6px"><strong>⚠ Alerta</strong>'+esc(r.als[j])+'</div>';
+  h+='<div class="recbox" style="margin-top:10px"><strong>Recomendação</strong>'+esc(r.rec)+'</div>';
+  document.getElementById('modal-c').innerHTML=h;
+  document.getElementById('modal').classList.add('on');
+}
+
+function fecharModal(){document.getElementById('modal').classList.remove('on');}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)fecharModal();});
+
+// ══════════════════════════════════════════════
+//  EXPORTAR
+// ══════════════════════════════════════════════
+function expCSV(){
+  var hist=carregarHist();
+  if(!hist.length){alert('Nenhum teste para exportar.');return;}
+  var cab=['ID','Propriedade','Data','Responsavel','Equipamento','Metodo','PPM','Classificacao','Regularidade','Vacuo','Teteiras','Entrada_Ar','Limpeza','Alertas','Recomendacao'];
+  var lns=[cab.join(';')];
+  for(var i=0;i<hist.length;i++){
+    var r=hist[i];
+    lns.push([r.id,r.p.prop,r.p.data,r.p.resp,r.p.equip,r.p.metodo||'—',r.ppm,r.classif,r.reg,r.vacuo,r.tet,r.ar,r.limp,'"'+(r.als||[]).join(' | ')+'"','"'+r.rec+'"'].join(';'));
+  }
+  baixar('reprogen_pulsador_v2.csv',lns.join('\n'),'text/csv;charset=utf-8;');
+}
+
+function expJSON(){
+  var hist=carregarHist();
+  if(!hist.length){alert('Nenhum teste para exportar.');return;}
+  baixar('reprogen_pulsador_v2.json',JSON.stringify(hist,null,2),'application/json');
+}
+
+function baixar(nome,cont,tipo){
+  var b=new Blob([cont],{type:tipo});
+  var u=URL.createObjectURL(b);
+  var a=document.createElement('a');
+  a.href=u;a.download=nome;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(u);},1000);
+}
+
+function imprimirRel(){
+  var hist=carregarHist();
+  if(!hist.length){alert('Nenhum teste para imprimir.');return;}
+  var h='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório Pulsador</title>';
+  h+='<style>body{font-family:Arial,sans-serif;font-size:12px;max-width:700px;margin:0 auto;padding:20px;}';
+  h+='h1{font-size:18px;border-bottom:2px solid #1e7e34;padding-bottom:6px;color:#1e7e34;}';
+  h+='h2{font-size:13px;color:#1e7e34;margin:14px 0 4px;}';
+  h+='table{width:100%;border-collapse:collapse;margin-bottom:10px;}';
+  h+='td,th{border:1px solid #ccc;padding:5px 8px;font-size:11px;}th{background:#f0f7f0;}';
+  h+='.alerta{background:#fff3f3;border-left:3px solid #c0392b;padding:4px 8px;margin:3px 0;font-size:11px;}';
+  h+='</style></head><body>';
+  h+='<h1>Reprogen — Relatório de Testes de Pulsador v2</h1>';
+  h+='<p style="font-size:11px;color:#666">Gerado em: '+new Date().toLocaleString('pt-BR')+'</p>';
+  for(var i=0;i<hist.length;i++){
+    var r=hist[i];
+    h+='<h2>Teste '+(i+1)+' — '+esc(r.p.prop)+' / '+r.p.data+'</h2>';
+    h+='<table><tr><th>Campo</th><th>Valor</th></tr>';
+    h+='<tr><td>Responsável</td><td>'+esc(r.p.resp)+'</td></tr>';
+    h+='<tr><td>Equipamento</td><td>'+esc(r.p.equip)+'</td></tr>';
+    h+='<tr><td>Método</td><td>'+esc(r.p.metodo||'—')+'</td></tr>';
+    h+='<tr><td>PPM</td><td><strong>'+r.ppm+'</strong></td></tr>';
+    h+='<tr><td>Classificação</td><td><strong>'+esc(r.classif)+'</strong></td></tr>';
+    h+='<tr><td>Regularidade</td><td>'+esc(r.reg)+'</td></tr>';
+    h+='<tr><td>Vácuo</td><td>'+esc(r.vacuo)+'</td></tr>';
+    h+='<tr><td>Teteiras</td><td>'+esc(r.tet)+'</td></tr>';
+    h+='</table>';
+    if(r.als&&r.als.length)for(var j=0;j<r.als.length;j++)h+='<div class="alerta">⚠ '+esc(r.als[j])+'</div>';
+    h+='<p style="font-size:11px;margin-top:6px"><strong>Recomendação:</strong> '+esc(r.rec)+'</p>';
+    h+='<hr style="border:none;border-top:1px solid #eee;margin:12px 0">';
+  }
+  h+='<p style="font-size:10px;color:#999;margin-top:16px">⚠ Triagem prática de campo. Para diagnóstico completo, use vacuômetro, pulsógrafo ou técnico especializado. Tomaz Pina Maia — CRMV-PA 03023-VP — Reprogen Assistência Rural.</p>';
+  h+='</body></html>';
+  var w=window.open('','_blank');
+  w.document.write(h);w.document.close();w.print();
+}
+
+// ══════════════════════════════════════════════
+//  LIMPAR
+// ══════════════════════════════════════════════
+function limpar(){
+  if(!confirm('Limpar todos os campos?'))return;
+  ['propriedade','responsavel','modelo','obs'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('num-conj').value='1';
+  document.getElementById('puls-manual').value='';
+  document.getElementById('ppm-manual-res').style.display='none';
+  document.getElementById('ppm-mic-res').style.display='none';
+  document.getElementById('btn-confirmar-mic').style.display='none';
+  document.querySelectorAll('.oitem').forEach(function(o){
+    o.classList.remove('on','onal');
+    o.querySelector('.ocir').textContent='';
+  });
+  S.opcoes={};S.ppmFinal=null;
+  S.batidas=0;S.micTempo=0;
+  document.getElementById('det-batidas').textContent='0';
+  document.getElementById('det-tempo').textContent='0s';
+  document.getElementById('det-ppm').textContent='—';
+  document.getElementById('mic-dot').className='mic-dot';
+  document.getElementById('mic-status-txt').innerHTML='<strong>Microfone inativo</strong>';
+  pararMic();pararCrono();
+}
+
+// ══════════════════════════════════════════════
+//  UTIL
+// ══════════════════════════════════════════════
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+
+// ══════════════════════════════════════════════
+//  PWA / SERVICE WORKER — GitHub Pages
+// ══════════════════════════════════════════════
+if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./service-worker.js').catch(function () {
+      // O app continua funcionando sem service worker; no GitHub Pages o registro deve ocorrer em HTTPS.
+    });
+  });
+}
+
+</script>
+</body>
+</html>
