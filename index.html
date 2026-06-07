@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Teste Pulsador v2.3 — Balde ao Pé</title>
+<title>Teste Pulsador v2.4 — Balde ao Pé</title>
 <meta name="theme-color" content="#1e7e34">
 <meta name="description" content="App offline de campo para medir pulsadas do pulsador de ordenhadeira balde ao pé.">
 <link rel="manifest" href="manifest.json">
@@ -146,6 +146,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .ppm-grande{text-align:center;margin:8px 0;}
 .ppm-num{font-family:var(--fd);font-size:62px;color:var(--verde-neon);line-height:1;}
 .ppm-lbl{font-family:var(--fm);font-size:11px;color:var(--texto2);letter-spacing:2px;text-transform:uppercase;}
+
+
+/* SOM PADRÃO */
+.sound-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 12px;}
+.sound-box{background:var(--bg);border:1px solid var(--borda);border-radius:8px;padding:12px;text-align:center;}
+.sound-num{font-family:var(--fd);font-size:36px;color:var(--verde-neon);line-height:1;}
+.sound-lbl{font-family:var(--fm);font-size:9px;color:var(--texto2);letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+.sound-pulse{height:16px;border-radius:999px;background:var(--bg3);border:1px solid var(--borda);overflow:hidden;margin:10px 0;position:relative;}
+.sound-dot{width:14px;height:14px;border-radius:50%;background:var(--verde-neon);box-shadow:0 0 16px rgba(77,219,110,.8);position:absolute;left:4px;top:0;opacity:.4;transition:left .08s linear,opacity .08s linear;}
+.sound-dot.on{left:calc(100% - 18px);opacity:1;}
+.sound-note{font-size:12px;color:var(--texto2);line-height:1.6;margin:8px 0 0;}
+.sound-note strong{color:var(--verde-neon);}
 
 /* STATUS CHIP */
 .schip{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:50px;
@@ -356,6 +368,27 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     </div>
   </div>
 
+
+  <!-- SOM PADRÃO -->
+  <div class="card fu">
+    <div class="ctitulo"><span>🎧</span> Som Padrão de Pulsação Regular</div>
+    <p class="sound-note">Use este som como <strong>referência auditiva de campo</strong>: ritmo constante, sem falhas, simulando 60 pulsadas por minuto.</p>
+    <div class="sound-grid">
+      <div class="sound-box">
+        <div class="sound-num">60</div>
+        <div class="sound-lbl">pulsadas/min</div>
+      </div>
+      <div class="sound-box">
+        <div class="sound-num">1s</div>
+        <div class="sound-lbl">por ciclo</div>
+      </div>
+    </div>
+    <div class="sound-pulse"><div class="sound-dot" id="sound-dot"></div></div>
+    <button class="btn btn-v" id="btn-som-padrao" onclick="toggleSomPadrao()">▶ OUVIR SOM REGULAR 60 PPM</button>
+    <button class="btn btn-c" onclick="tocarSomCicloUnico()">🔊 Tocar 1 ciclo de exemplo</button>
+    <div class="avt">O som é uma simulação didática gerada pelo app. Não substitui escutar o equipamento real, medir vácuo ou usar pulsógrafo.</div>
+  </div>
+
   <!-- REGULARIDADE -->
   <div class="card fu">
     <div class="ctitulo"><span>🔊</span> Regularidade do Som</div>
@@ -463,7 +496,9 @@ var S = {
   limiar: 0.30,
   emDeteccao: false, cooldown: false,
   animFrame: null,
-  waveData: null
+  waveData: null,
+  // Som padrão
+  somPadraoAtivo: false, refAudioCtx: null, refTimer: null, refBeat: 0
 };
 
 // ══════════════════════════════════════════════
@@ -562,6 +597,77 @@ function calcPPM() {
   S.ppmFinal = ppm;
 }
 
+
+// ══════════════════════════════════════════════
+//  SOM PADRÃO — 60 PULSADAS/MINUTO
+// ══════════════════════════════════════════════
+function toggleSomPadrao() {
+  if (S.somPadraoAtivo) { pararSomPadrao(); return; }
+  iniciarSomPadrao();
+}
+
+function iniciarSomPadrao() {
+  try {
+    if (S.micAtivo) pararMic();
+    S.refAudioCtx = S.refAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (S.refAudioCtx.state === 'suspended') S.refAudioCtx.resume();
+    S.somPadraoAtivo = true;
+    S.refBeat = 0;
+    document.getElementById('btn-som-padrao').textContent = '⏹ PARAR SOM REGULAR';
+    document.getElementById('btn-som-padrao').classList.add('ativo');
+    tocarPulsoPadrao();
+    S.refTimer = setInterval(tocarPulsoPadrao, 1000); // 60 pulsadas/minuto = 1 ciclo por segundo
+  } catch(e) {
+    alert('Não foi possível iniciar o som neste navegador. Toque novamente ou verifique o volume do aparelho.');
+  }
+}
+
+function pararSomPadrao() {
+  S.somPadraoAtivo = false;
+  if (S.refTimer) clearInterval(S.refTimer);
+  S.refTimer = null;
+  var btn = document.getElementById('btn-som-padrao');
+  if (btn) { btn.textContent = '▶ OUVIR SOM REGULAR 60 PPM'; btn.classList.remove('ativo'); }
+  var dot = document.getElementById('sound-dot');
+  if (dot) dot.classList.remove('on');
+}
+
+function tocarSomCicloUnico() {
+  try {
+    S.refAudioCtx = S.refAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (S.refAudioCtx.state === 'suspended') S.refAudioCtx.resume();
+    tocarPulsoPadrao();
+  } catch(e) {
+    alert('Não foi possível tocar o exemplo neste navegador.');
+  }
+}
+
+function tocarPulsoPadrao() {
+  if (!S.refAudioCtx) return;
+  var ctx = S.refAudioCtx;
+  var t = ctx.currentTime;
+  // Dois sinais curtos simulam abertura/fechamento dentro de 1 ciclo regular.
+  beep(ctx, t, 620, 0.055, 0.16);
+  beep(ctx, t + 0.36, 390, 0.07, 0.13);
+  var dot = document.getElementById('sound-dot');
+  if (dot) {
+    dot.classList.add('on');
+    setTimeout(function(){ dot.classList.remove('on'); }, 430);
+  }
+}
+
+function beep(ctx, start, freq, dur, gainVal) {
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(freq, start);
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(gainVal, start + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(start); osc.stop(start + dur + 0.03);
+}
+
 // ══════════════════════════════════════════════
 //  MICROFONE — WEB AUDIO API
 // ══════════════════════════════════════════════
@@ -571,6 +677,7 @@ function toggleMic() {
 }
 
 function iniciarMic() {
+  pararSomPadrao();
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     alert('Microfone não suportado neste navegador.\nUse Chrome no Android ou abra o arquivo via HTTPS/GitHub Pages.');
     return;
@@ -751,13 +858,15 @@ function selOpcao(el, grp, val) {
 // ══════════════════════════════════════════════
 function classif(ppm) {
   if (ppm < 50) return {label:'PULSADOR LENTO',cls:'sr',
-    msg:'Pulsador abaixo da faixa prática. Pode causar ordenha demorada, esgotamento inadequado e desconforto. Revisar pulsador, mangueiras, vácuo e sujeira interna.'};
-  if (ppm <= 60) return {label:'FAIXA ACEITÁVEL',cls:'sv',
-    msg:'Resultado dentro da faixa prática para avaliação de campo. Confirmar vácuo, regularidade do som, teteiras e funcionamento dos dois lados.'};
-  if (ppm <= 65) return {label:'LIGEIRAMENTE RÁPIDO',cls:'sl',
-    msg:'Resultado um pouco acima da faixa prática. Pode depender do modelo, mas recomenda-se conferir regulagem e estabilidade.'};
+    msg:'Abaixo da faixa prática. Pode causar ordenha demorada, esgotamento inadequado e desconforto. Revisar pulsador, mangueiras, vácuo e sujeira interna.'};
+  if (ppm <= 55) return {label:'ACEITÁVEL BAIXO / ATENÇÃO',cls:'sa',
+    msg:'Funciona como faixa prática baixa, mas merece observação. Comparar com o som padrão regular e conferir vácuo e limpeza.'};
+  if (ppm <= 60) return {label:'PADRÃO REGULAR IDEAL',cls:'sv',
+    msg:'Dentro do padrão ideal de campo. Referência prática: ritmo constante próximo de 60 pulsadas por minuto.'};
+  if (ppm <= 65) return {label:'ACEITÁVEL ALTO / ATENÇÃO',cls:'sl',
+    msg:'Acima do ideal, mas pode depender do modelo e regulagem. Conferir estabilidade, relação de pulsação e vácuo.'};
   return {label:'PULSADOR RÁPIDO',cls:'sr',
-    msg:'Pulsador acima da faixa prática. Pode prejudicar massagem do teto, aumentar risco de lesões. Avaliação técnica imediata recomendada.'};
+    msg:'Acima da faixa prática. Pode reduzir tempo de massagem do teto e aumentar risco de lesões. Avaliação técnica imediata recomendada.'};
 }
 
 // ══════════════════════════════════════════════
@@ -792,9 +901,14 @@ function gerarResultado() {
   if (ar === 'Sim' || ar === 'Às vezes') als.push('Entrada falsa de ar ou queda de teteira confirma problema no circuito de vácuo.');
   if (limp === 'Não') als.push('Pulsador sem limpeza recente — resíduo pode estar bloqueando orifício calibrado e alterando o ritmo.');
 
+  var regularFuncional = (ppm !== null && ppm >= 56 && ppm <= 60 && reg === 'Regular' && vacuo !== 'Não' && (ar === 'Não' || ar === '—') && ['Rachadas','Deformadas'].indexOf(tet) === -1);
+  if (ppm !== null && ppm >= 56 && ppm <= 60 && !regularFuncional) {
+    als.push('Pulsadas dentro do padrão, mas funcionamento não aprovado como regular. Conferir som, vácuo, entrada de ar, teteiras e os dois lados do pulsador.');
+  }
+
   var rec = '';
   if (!cl) rec = 'Conclua a medição para obter a recomendação.';
-  else if (cl.cls === 'sv' && als.length === 0) rec = 'Pulsador dentro da faixa prática. Manter limpeza periódica, conferir vácuo e revisar teteiras a cada 2.500 ordenhas ou 6 meses.';
+  else if (regularFuncional && als.length === 0) rec = 'Pulsador aprovado como padrão regular de campo: 56–60 pulsadas/min, som constante e sem alertas funcionais. Manter limpeza periódica, conferir vácuo e revisar teteiras conforme rotina da fazenda.';
   else if (cl.cls === 'sr' || als.length > 0) rec = 'Intervenção técnica recomendada: desmontagem e limpeza do pulsador, inspeção de membrana, válvulas e borrachas, verificação de vácuo com vacuômetro, substituição de peças desgastadas.';
   else rec = 'Ajustar regulagem conforme manual do fabricante. Verificar vácuo e estado das teteiras.';
 
@@ -802,7 +916,7 @@ function gerarResultado() {
   var reg2 = {
     id: Date.now(), p: p, ppm: ppm !== null ? ppm : '—',
     classif: cl ? cl.label : '—', reg: reg, vacuo: vacuo,
-    tet: tet, ar: ar, limp: limp, als: als, rec: rec
+    tet: tet, ar: ar, limp: limp, regularFuncional: regularFuncional ? 'SIM' : 'NÃO', als: als, rec: rec
   };
   salvarHist(reg2);
 
@@ -811,6 +925,7 @@ function gerarResultado() {
   h += '<div class="rbox"><div class="mtit" style="font-size:18px;margin-bottom:12px">📋 Resumo</div>';
   h += rl('Propriedade', p.prop)+rl('Data', p.data)+rl('Responsável', p.resp);
   h += rl('Equipamento', p.equip)+rl('Método', p.metodo);
+  h += rl('Padrão esperado', '56–60 ppm · referência 60 ppm');
   h += rl('Pulsadas/min', '<span style="font-family:var(--fd);font-size:24px;color:var(--verde-neon)">'+(ppm !== null ? ppm : '—')+'</span>');
   h += '</div>';
 
@@ -824,7 +939,9 @@ function gerarResultado() {
   h += '<div class="rbox">';
   var rcls = ['Falhando','Oscilando','Um lado não pulsa'].indexOf(reg) !== -1 ? 'sr' : (reg === 'Regular' ? 'sv' : 'sc');
   h += '<div class="ctitulo" style="margin-bottom:8px"><span>🔊</span> Regularidade</div>';
-  h += '<div class="schip '+rcls+'" style="margin-bottom:0">'+esc(reg)+'</div></div>';
+  h += '<div class="schip '+rcls+'" style="margin-bottom:8px">'+esc(reg)+'</div>';
+  h += rl('Aprovação funcional', regularFuncional ? '<span style="color:var(--verde-neon);font-weight:700">REGULAR</span>' : '<span style="color:var(--amarelo-cl);font-weight:700">REVISAR</span>');
+  h += '</div>';
 
   h += '<div class="rbox"><div class="ctitulo" style="margin-bottom:8px"><span>🔍</span> Complementar</div>';
   h += rl('Vácuo', vacuo)+rl('Teteiras', tet)+rl('Entrada de ar', ar)+rl('Limpeza', limp);
@@ -996,7 +1113,7 @@ function limpar(){
   document.getElementById('det-ppm').textContent='—';
   document.getElementById('mic-dot').className='mic-dot';
   document.getElementById('mic-status-txt').innerHTML='<strong>Microfone inativo</strong>';
-  pararMic();pararCrono();
+  pararMic();pararCrono();pararSomPadrao();
 }
 
 // ══════════════════════════════════════════════

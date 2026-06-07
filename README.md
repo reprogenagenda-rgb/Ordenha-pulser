@@ -1,4 +1,4 @@
-# Teste Pulsador Balde ao Pé v2.3
+# Teste Pulsador Balde ao Pé v2.4
 
 App PWA offline-first para avaliação prática de campo das pulsadas do pulsador de ordenhadeira balde ao pé.
 
@@ -22,8 +22,16 @@ App PWA offline-first para avaliação prática de campo das pulsadas do pulsado
 ## Mensagem de commit sugerida
 
 ```text
-Publicar Teste Pulsador Balde ao Pé v2.3 como PWA
+Publicar Teste Pulsador Balde ao Pé v2.4 como PWA
 ```
+
+
+## Novidade da v2.4
+
+- Botão para ouvir o som padrão de pulsação regular em 60 pulsadas/minuto.
+- Simulação de ciclo gerada no próprio navegador, sem arquivo de áudio externo.
+- Classificação refinada: 56–60 ppm como padrão regular ideal; 50–55 e 61–65 como faixas de atenção.
+- Resultado agora mostra padrão esperado e aprovação funcional como REGULAR ou REVISAR.
 
 ## Teste obrigatório
 
